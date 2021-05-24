@@ -4,6 +4,7 @@ from keras.layers import Dense
 np.set_printoptions(precision=4,suppress=True)
 import math
 LIMIT = 10
+import matplotlib.pyplot as plt
 
 def GRN_gen(dim, lw,high):
     reso = np.zeros([dim,dim])
@@ -78,23 +79,35 @@ model.add(Dense(dim*8, activation='relu'))
 model.add(Dense(dim, activation='sigmoid'))
 
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(training_x, training_y, epochs=1000, batch_size=20)
+history1 = model.fit(training_x, training_y, validation_split=0.33, epochs=150, batch_size=10, verbose=0)
 _, accuracy = model.evaluate(training_x, training_y)
 print('Accuracy: %.2f' % (accuracy*100))
 
+
+
+model = Sequential()
+model.add(Dense(dim*2, input_dim=dim, activation='relu'))
+model.add(Dense(dim*4, activation='relu'))
+model.add(Dense(dim, activation='sigmoid'))
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+history2 = model.fit(training_x, training_y, validation_split=0.33, epochs=150, batch_size=10, verbose=0)
+
+model = Sequential()
+model.add(Dense(dim*4, input_dim=dim, activation='relu'))
+model.add(Dense(dim*2, activation='relu'))
+model.add(Dense(dim, activation='sigmoid'))
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+history3 = model.fit(training_x, training_y, validation_split=0.33, epochs=150, batch_size=10, verbose=0)
+
 predictions = model.predict(testing_x)
-
-c = 0
-for i in predictions:
-    
-    print('--------------', c, '---------------')
-    print(i)
-    print(testing_y[c])
-    c = c+1
-
-
-for i in data:
-    print(i)
-
-
-
+plt.plot(history1.history['accuracy'])
+plt.plot(history1.history['val_accuracy'])
+plt.plot(history2.history['accuracy'])
+plt.plot(history2.history['val_accuracy'])
+plt.plot(history3.history['accuracy'])
+plt.plot(history3.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['4-8_train', '4-8_test','2-4_train','2-4_test', '4-2_train', '4-2_test'], loc='upper left')
+plt.show()
